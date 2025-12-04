@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>🤖 StaxTech FAQ Chatbot</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>🤖 StaxTech FAQ Chatbot</h1>
+    <p class="subtitle">Ask anything about the internship!</p>
+
+    <div id="chatbox">
+      <div class="bot msg">🤖 Hi! I'm your StaxTech assistant. Ask me anything!</div>
+    </div>
+
+    <div id="controls">
+      <input id="question" placeholder="Type your question..." autofocus />
+      <button id="send">Ask</button>
+    </div>
+  </div>
+
+  <script>
+    const sendBtn = document.getElementById('send');
+    const questionInput = document.getElementById('question');
+    const chatbox = document.getElementById('chatbox');
+
+    function addMessage(text, cls='bot') {
+      const d = document.createElement('div');
+      d.className = cls + " msg";
+      d.innerHTML = text;
+      chatbox.appendChild(d);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    async function askQuestion() {
+      const q = questionInput.value.trim();
+      if (!q) return;
+      addMessage("🧑‍💻 You: " + q, "user");
+      questionInput.value = "";
+
+      try {
+        const resp = await fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: q })
+        });
+        const data = await resp.json();
+        addMessage("🤖 " + data.answer, "bot");
+      } catch (e) {
+        addMessage("❌ Error connecting to server.", "bot");
+      }
+    }
+
+    sendBtn.onclick = askQuestion;
+    questionInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") askQuestion();
+    });
+  </script>
+
+</body>
+</html>
